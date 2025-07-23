@@ -3,27 +3,29 @@ import './PdfUpload.css';
 
 interface PdfUploadProps {
   onFileSelect?: (file: File) => void;
+  isUploading?: boolean;
+  error?: string;
 }
 
-const PdfUpload: React.FC<PdfUploadProps> = ({ onFileSelect }) => {
+const PdfUpload: React.FC<PdfUploadProps> = ({ onFileSelect, isUploading = false, error = '' }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [error, setError] = useState<string>('');
+  const [localError, setLocalError] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): boolean => {
     if (file.type !== 'application/pdf') {
-      setError('Please select a valid PDF file');
+      setLocalError('Please select a valid PDF file');
       return false;
     }
     
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
-      setError('File size must be less than 10MB');
+      setLocalError('File size must be less than 10MB');
       return false;
     }
     
-    setError('');
+    setLocalError('');
     return true;
   };
 
@@ -62,16 +64,20 @@ const PdfUpload: React.FC<PdfUploadProps> = ({ onFileSelect }) => {
   };
 
   const handleClick = () => {
-    fileInputRef.current?.click();
+    if (!isUploading) {
+      fileInputRef.current?.click();
+    }
   };
 
   const removeFile = () => {
     setSelectedFile(null);
-    setError('');
+    setLocalError('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
+
+  const displayError = error || localError;
 
   return (
     <div className="pdf-upload-container">
@@ -81,7 +87,7 @@ const PdfUpload: React.FC<PdfUploadProps> = ({ onFileSelect }) => {
       </div>
 
       <div
-        className={`upload-area ${isDragOver ? 'drag-over' : ''} ${selectedFile ? 'has-file' : ''}`}
+        className={`upload-area ${isDragOver ? 'drag-over' : ''} ${selectedFile ? 'has-file' : ''} ${isUploading ? 'uploading' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -93,9 +99,18 @@ const PdfUpload: React.FC<PdfUploadProps> = ({ onFileSelect }) => {
           accept=".pdf"
           onChange={handleFileInputChange}
           style={{ display: 'none' }}
+          disabled={isUploading}
         />
         
-        {!selectedFile ? (
+        {isUploading ? (
+          <div className="upload-content">
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+            </div>
+            <p className="upload-text">Processing document...</p>
+            <p className="upload-hint">This may take a few moments</p>
+          </div>
+        ) : !selectedFile ? (
           <div className="upload-content">
             <div className="upload-icon">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -132,18 +147,18 @@ const PdfUpload: React.FC<PdfUploadProps> = ({ onFileSelect }) => {
         )}
       </div>
 
-      {error && (
+      {displayError && (
         <div className="error-message">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10"/>
             <line x1="15" y1="9" x2="9" y2="15"/>
             <line x1="9" y1="9" x2="15" y2="15"/>
           </svg>
-          {error}
+          {displayError}
         </div>
       )}
 
-      {selectedFile && !error && (
+      {selectedFile && !displayError && !isUploading && (
         <div className="success-message">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>

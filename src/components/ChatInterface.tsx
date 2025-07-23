@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './ChatInterface.css';
+import { api, UploadResponse } from '../services/api';
 
 interface Message {
   id: string;
@@ -10,10 +11,11 @@ interface Message {
 
 interface ChatInterfaceProps {
   documentName?: string;
+  documentInfo?: UploadResponse | null;
   onBackToUpload?: () => void;
 }
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentName, onBackToUpload }) => {
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentName, documentInfo, onBackToUpload }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -34,7 +36,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentName, onBackToUpl
     scrollToBottom();
   }, [messages]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
 
@@ -46,20 +48,33 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentName, onBackToUpl
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const question = inputValue;
     setInputValue('');
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const response = await api.queryDocument({ question });
+      
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "This is a sample response from the knowledge base. In a real implementation, this would be the AI's response based on the uploaded document content.",
+        text: response,
         isUser: false,
         timestamp: new Date()
       };
+      
       setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        isUser: false,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const formatTime = (date: Date) => {
@@ -76,7 +91,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentName, onBackToUpl
           Back to Upload
         </button>
         <div className="chat-title">
-          <h2>Knowledge Base Chat</h2>
+          <h2>Ask AI</h2>
           {documentName && <p className="document-name">{documentName}</p>}
         </div>
         <div className="header-actions">
