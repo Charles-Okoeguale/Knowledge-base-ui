@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
+import Header from './components/Header';
 import PdfUpload from './components/PdfUpload';
 import ChatInterface from './components/ChatInterface';
 import { api, UploadResponse } from './services/api';
@@ -47,9 +48,7 @@ function App() {
     <div className="App">
       {currentScreen === 'upload' ? (
         <>
-          <header className="App-header">
-            <h1>Knowledge Base UI</h1>
-          </header>
+          <Header />
           <main>
             <PdfUpload 
               onFileSelect={handleFileSelect}

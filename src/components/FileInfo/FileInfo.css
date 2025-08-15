@@ -1,0 +1,66 @@
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.file-icon {
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.file-details {
+  flex: 1;
+  text-align: left;
+}
+
+.file-name {
+  font-weight: 500;
+  color: #1f2937;
+  margin: 0 0 0.25rem 0;
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-size {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+  flex-shrink: 0;
+}
+
+.remove-btn:hover {
+  background-color: #f3f4f6;
+  color: #ef4444;
+}
+
+@media (max-width: 640px) {
+  .file-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .file-details {
+    text-align: center;
+  }
+} 
